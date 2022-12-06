@@ -49,8 +49,9 @@ class MongoService:
             self,
             user: str,
             text: str,
-            solution: str = None,
-            answerIsSolution: bool = False,
+            solution: str = '',
+            answer: str = '',
+            answerIsSolution: bool = False
     ):
         db = self.client.math_net
         problems_collection = db.problems
@@ -67,8 +68,10 @@ class MongoService:
             'image': None,
             'creationDate': now,
             'solution': solution,
+            'answer': answer,
             'answerIsSolution': answerIsSolution,
             'open': False,
+            'moderators': [],
             'likes': [],
             'comments': []
         }
@@ -78,3 +81,26 @@ class MongoService:
         document_id = result.inserted_id
         print(f"_id of inserted document: {document_id}")
         return document_id
+
+    def update_problem(
+            self,
+            problem_id: str,
+            text: str,
+            solution: str = '',
+            answer: str = '',
+            answerIsSolution: bool = False
+    ):
+        db = self.client.math_net
+        problems_collection = db.problems
+
+        if text.isspace():
+            raise NoProblemText()
+
+        correction = {
+            'text': text,
+            'solution': solution,
+            'answer': answer,
+            'answerIsSolution': answerIsSolution
+        }
+
+        problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$set': correction})
