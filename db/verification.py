@@ -1,12 +1,14 @@
+import configparser
 import random
 import smtplib
 from email.mime.text import MIMEText
 
 
 def send_email(email):
-    sender = "morcik155@gmail.com"
-    # your password = "your password"
-    password = "password"
+    configload = configparser.RawConfigParser()
+    configload.read('../server.properties')
+    sender = configload.get('verification', 'email')
+    password = configload.get('verification', 'password')
 
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
