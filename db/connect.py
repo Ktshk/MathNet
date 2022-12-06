@@ -104,3 +104,12 @@ class MongoService:
         }
 
         problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$set': correction})
+
+    def add_like(self, problem_id: str, user: str, delete_like: bool):
+        db = self.client.math_net
+        problems_collection = db.problems
+
+        if delete_like:
+            problems_collection.update_one({'_id': ObjectId(problem_id)}, {'&pull': ObjectId(user)})
+        else:
+            problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$addToSet': ObjectId(user)})
