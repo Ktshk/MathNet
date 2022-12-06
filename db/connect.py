@@ -5,6 +5,10 @@ import verification
 from bson import ObjectId
 
 
+class NoProblemText(Exception):
+    pass
+
+
 class MongoService:
     def __init__(self):
         configload = configparser.RawConfigParser()
@@ -41,20 +45,32 @@ class MongoService:
         print(f"_id of inserted document: {document_id}")
         return document_id
 
-    def add_problem(self, user: str, text: str):
+    def add_problem(
+            self,
+            user: str,
+            text: str,
+            solution: str = None,
+            answerIsSolution: bool = False,
+    ):
         db = self.client.math_net
         problems_collection = db.problems
 
         now = datetime.datetime.utcnow()
 
         if text.isspace():
-            return "err"
+            raise NoProblemText()
 
         new_problem = {
             'user': ObjectId(user),
             'text': text,
             'tags': [],
-            'creationDate': now
+            'image': None,
+            'creationDate': now,
+            'solution': solution,
+            'answerIsSolution': answerIsSolution,
+            'open': False,
+            'likes': [],
+            'comments': []
         }
 
         result = problems_collection.insert_one(new_problem)
