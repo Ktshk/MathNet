@@ -5,7 +5,7 @@ import verification
 from bson import ObjectId
 
 
-class NoProblemText(Exception):
+class NoDataText(Exception):
     pass
 
 
@@ -59,7 +59,7 @@ class MongoService:
         now = datetime.datetime.utcnow()
 
         if text.isspace():
-            raise NoProblemText()
+            raise NoDataText()
 
         new_problem = {
             'user': ObjectId(user),
@@ -73,7 +73,8 @@ class MongoService:
             'open': False,
             'moderators': [],
             'likes': [],
-            'comments': []
+            'comments': dict(),
+            'nextCommentIndex': 1
         }
 
         result = problems_collection.insert_one(new_problem)
@@ -94,7 +95,7 @@ class MongoService:
         problems_collection = db.problems
 
         if text.isspace():
-            raise NoProblemText()
+            raise NoDataText()
 
         correction = {
             'text': text,
@@ -110,6 +111,49 @@ class MongoService:
         problems_collection = db.problems
 
         if delete_like:
-            problems_collection.update_one({'_id': ObjectId(problem_id)}, {'&pull': ObjectId(user)})
+            problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$pull': {'likes': ObjectId(user)}})
         else:
-            problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$addToSet': ObjectId(user)})
+            problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$addToSet': {'likes': ObjectId(user)}})
+
+    def add_comment(
+        self,
+        problem_id: str,
+        user: str,
+        text: str,
+        isSolution: bool,
+        answer: str = None,
+        correctSolution: bool = None,
+        parent: int = 0
+    ):
+        db = self.client.math_net
+        problems_collection = db.problems
+
+        now = datetime.datetime.utcnow()
+
+        if text.isspace():
+            raise NoDataText()
+
+        problem = problems_collection.find_one({'_id': ObjectId(problem_id)})
+        new_id = problem['nextCommentIndex']
+
+        new_comment = {
+            'id': new_id,
+            'user': ObjectId(user),
+            'text': text,
+            'isSolution': isSolution,
+            'likes': [],
+            'creationDate': now,
+            'parent': parent
+        }
+
+        if answer is not None:
+            new_comment['answer'] = answer
+
+        if correctSolution is not None:
+            new_comment['correctSolution'] = correctSolution
+
+        correction = {'comments.' + str(new_id): new_comment}
+
+        problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$inc': {'nextCommentIndex': 1}, '$set': correction})
+
+        return new_id
