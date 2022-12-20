@@ -12,7 +12,7 @@ class NoDataText(Exception):
 class MongoService:
     def __init__(self):
         configload = configparser.RawConfigParser()
-        configload.read('../server.properties')
+        configload.read('server.properties')
         self.client = pymongo.MongoClient(configload.get('db', 'mongourl'))
 
     def create_user(self, login, name, password, email):
@@ -157,3 +157,10 @@ class MongoService:
         problems_collection.update_one({'_id': ObjectId(problem_id)}, {'$inc': {'nextCommentIndex': 1}, '$set': correction})
 
         return new_id
+    def get_users(self):
+        col = self.client.math_net.users
+        j = col.find()
+        result = []
+        for i in j:
+            result.append(i['login'])
+        return result

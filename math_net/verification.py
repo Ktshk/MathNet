@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 
 def send_email(email):
     configload = configparser.RawConfigParser()
-    configload.read('../server.properties')
+    configload.read('server.properties')
     sender = configload.get('verification', 'email')
     password = configload.get('verification', 'password')
 
@@ -14,6 +14,7 @@ def send_email(email):
     server.starttls()
 
     try:
+        code = random.randint(100000, 999999)
         server.login(sender, password)
         msg = MIMEText('Your verification code is: ' + str(random.randint(100000, 999999)))
         msg["Subject"] = "Verification code"
