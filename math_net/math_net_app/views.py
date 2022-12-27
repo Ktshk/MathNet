@@ -1,6 +1,6 @@
 from django.shortcuts import render
 import connect
-from .forms import LoginForm
+from .forms import *
 
 ms = connect.MongoService()
 
@@ -8,6 +8,14 @@ ms = connect.MongoService()
 # Create your views here.
 def home(request):
     return render(request, 'math_net_app/index.html', {'accs': ms.get_users()})
+
+def search(request):
+    form = SearchUserForm(request.POST or None)
+    if form.is_valid():
+        user_data = ms.search_users(form.cleaned_data.get("name"))
+        return render(request, 'math_net_app/search.html', {'form': form, 'res': user_data})
+    return render(request, 'math_net_app/search.html', {'form': form})
+
 
 
 def about(request):

@@ -11,7 +11,7 @@ class NoDataText(Exception):
 class MongoService:
     def __init__(self):
         configload = configparser.RawConfigParser()
-        configload.read('server.properties')
+        configload.read('./server.properties')
         self.client = pymongo.MongoClient(configload.get('db', 'mongourl'))
 
     def create_user(self, login, name, password, email):
@@ -169,3 +169,11 @@ class MongoService:
             return 0
         else:
             return res
+
+    def search_users(self, name):
+        col = self.client.math_net.users
+        j = col.find({'name': {'$regex': name}})
+        result = []
+        for i in j:
+            result.append(i['name'])
+        return result

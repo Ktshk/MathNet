@@ -3,5 +3,6 @@ from math_net_app import views
 
 urlpatterns = [
     path('', views.login, name="login"),
-    path('about/', views.about, name="about")
+    path('about/', views.about, name="about"),
+    path('search/', views.search, name="search")
 ]
