@@ -1,7 +1,6 @@
 import pymongo
 import configparser
 import datetime
-import verification
 from bson import ObjectId
 
 
@@ -36,7 +35,6 @@ class MongoService:
             "password": password,
             "email": email
         }
-        print(verification.send_email('morcik155@gmail.com'))
 
         result = users_collection.insert_one(new_user)
 
@@ -164,3 +162,10 @@ class MongoService:
         for i in j:
             result.append(i['login'])
         return result
+
+    def check_user(self, login, password):
+        res = self.client.math_net.users.find_one({"login": login, "password": password})
+        if res is None:
+            return 0
+        else:
+            return res

@@ -22,7 +22,12 @@ def login(request):
     print("String 13,", request)
     form = LoginForm(request.POST or None)
     if form.is_valid():
-        request.session['username'] = form.cleaned_data.get("user_name")
+        user_data = ms.check_user(form.cleaned_data.get("login"), form.cleaned_data.get("password"))
+        if user_data != 0:
+            request.session['username'] = form.cleaned_data.get("login")
+            request.session['userid'] = str(user_data['_id'])
+        else:
+            return render(request, 'math_net_app/login.html', {"form": form, "msg": "Error of password or login"})
     sssr = request.session.get("username", None)
     if sssr is None:
         # Redirecting to login page

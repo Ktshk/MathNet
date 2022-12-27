@@ -9,19 +9,18 @@ def send_email(email):
     configload.read('server.properties')
     sender = configload.get('verification', 'email')
     password = configload.get('verification', 'password')
+    code = random.randint(100000, 999999)
 
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
 
     try:
-        code = random.randint(100000, 999999)
         server.login(sender, password)
-        msg = MIMEText('Your verification code is: ' + str(random.randint(100000, 999999)))
+        msg = MIMEText('Your verification code is: ' + str(code))
         msg["Subject"] = "Verification code"
         server.sendmail(sender, email, msg.as_string())
 
-        return "The message was sent successfully!"
+        print("The message was sent successfully!")
     except Exception as _ex:
-        return f"{_ex}\nCheck your login or password please!"
-
-
+        print(f"{_ex}\nCheck your login or password please!")
+    return code
